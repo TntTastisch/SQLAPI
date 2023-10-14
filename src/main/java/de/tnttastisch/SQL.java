@@ -2,12 +2,8 @@ package de.tnttastisch;
 
 import com.zaxxer.hikari.pool.*;
 import org.slf4j.*;
-import sun.security.util.ByteArrays;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.sql.*;
-import java.util.Arrays;
 import java.util.concurrent.*;
 
 /**
@@ -185,55 +181,71 @@ public class SQL {
     private void setArgs(Object[] args, PreparedStatement statement) throws SQLException {
         for (int i = 0; i != args.length; i++) {
             Object o = args[i];
+            int arg = i+1;
 
-            switch (o.getClass().getTypeName().toLowerCase()) {
-                case "string": {
-                    statement.setString(i+1, String.valueOf(o));
-                    break;
-                }
-                case "integer": {
-                    statement.setInt(i+1, Integer.parseInt(String.valueOf(o)));
-                    break;
-                }
-                case "boolean": {
-                    statement.setBoolean(i+1, Boolean.parseBoolean(String.valueOf(o)));
-                    break;
-                }
-                case "long": {
-                    statement.setLong(i+1, Long.parseLong(String.valueOf(o)));
-                    break;
-                }
-                case "byte": {
-                    statement.setByte(i+1, Byte.parseByte(String.valueOf(o)));
-                    break;
-                }
-                case "double": {
-                    statement.setDouble(i+1, Double.parseDouble(String.valueOf(o)));
-                    break;
-                }
-                case "float": {
-                    statement.setFloat(i+1, Float.parseFloat(String.valueOf(o )));
-                    break;
-                }
-                case "array": {
-                    statement.setArray(i+1, (Array) Arrays.asList(String.valueOf(o)));
-                    break;
-                }
-                case "date": {
-                    statement.setDate(i+1, Date.valueOf(String.valueOf(o)));
-                    break;
-                }
-                case "time": {
-                    statement.setTime(i+1, Time.valueOf(String.valueOf(o)));
-                    break;
-                }
-                case "timestamp": {
-                    statement.setTimestamp(i+1, Timestamp.valueOf(String.valueOf(o)));
-                    break;
-                }
-                default: {
-                    statement.setObject(i+1, o);
-                }
+            if (o instanceof String) {
+                statement.setString(arg, String.valueOf(o));
+                continue;
+            }
+
+            if (o instanceof Integer) {
+                statement.setInt(arg, Integer.parseInt(String.valueOf(o)));
+                continue;
+            }
+
+            if (o instanceof Long) {
+                statement.setLong(arg, Long.parseLong(String.valueOf(o)));
+                continue;
+            }
+
+            if (o instanceof Double) {
+                statement.setDouble(arg, Double.parseDouble(String.valueOf(o)));
+                continue;
+            }
+
+            if (o instanceof Float) {
+                statement.setFloat(arg, Float.parseFloat(String.valueOf(o)));
+                continue;
+            }
+
+            if (o instanceof Boolean) {
+                statement.setBoolean(arg, Boolean.parseBoolean(String.valueOf(o)));
+                continue;
+            }
+
+            if (o instanceof Byte) {
+                statement.setByte(arg, Byte.parseByte(String.valueOf(o)));
+                continue;
+            }
+
+            if(o instanceof Date) {
+                statement.setDate(arg, Date.valueOf(String.valueOf(o)));
+                continue;
+            }
+
+            if (o instanceof Time) {
+                statement.setTime(arg, Time.valueOf(String.valueOf(o)));
+                continue;
+            }
+
+            if (o instanceof Timestamp) {
+                statement.setTimestamp(arg, Timestamp.valueOf(String.valueOf(o)));
+                continue;
+            }
+
+            // Check
+            if (o instanceof Array) {
+                statement.setArray(arg, (Array) o);
+                continue;
+            }
+
+            if (o instanceof Byte[]) {
+                statement.setBytes(arg, (byte[]) o);
+                continue;
+            }
+
+            if (o != null) {
+                statement.setObject(arg, o);
             }
         }
     }
