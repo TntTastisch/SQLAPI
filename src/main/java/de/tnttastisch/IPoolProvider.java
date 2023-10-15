@@ -4,6 +4,7 @@ import com.zaxxer.hikari.pool.*;
 
 /**
  * The IPoolProvider interface provides a method for creating a Hikari connection pool.
+ * @since = 1.0-RELEASE
  */
 public interface IPoolProvider {
 
