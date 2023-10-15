@@ -22,7 +22,7 @@ The SQL API for Java offers a user-friendly approach to execute SQL queries and 
 ```
 ## Documentation
 
-For comprehensive documentation and detailed usage instructions, please visit the [SQL API Documentation](https://docs.tnttastisch.de/sqlapi). This documentation provides in-depth explanations of the SQL API's functionalities, usage examples, and best practices. It serves as a comprehensive guide for effectively integrating the SQL API into your Java applications.
+For comprehensive documentation and detailed usage instructions, please visit the [SQL API Documentation](https://docs.tnttastisch.de/sqlapi-v1). This documentation provides in-depth explanations of the SQL API's functionalities, usage examples, and best practices. It serves as a comprehensive guide for effectively integrating the SQL API into your Java applications.
 
 For any additional questions or support, please refer to the documentation or reach out to the support team at my discord [http://discord.gg/9t36BY5](http://discord.gg/9t36BY5).
 
