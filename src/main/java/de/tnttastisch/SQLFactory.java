@@ -102,7 +102,6 @@ public class SQLFactory {
         try {
             switch (type.getType()) {
                 case MYSQL:
-                case MARIADB:
                     this.connectionAuthenticator = new ConnectionAuthenticator(getLogger(), () -> {
                         HikariConfig conf = new HikariConfig();
                         conf.setConnectionTimeout(7500);

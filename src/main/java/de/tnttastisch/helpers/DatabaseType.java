@@ -3,8 +3,7 @@ package de.tnttastisch.helpers;
 public enum DatabaseType {
 
     SQLITE,
-    MYSQL,
-    MARIADB;
+    MYSQL;
 
     public DatabaseType type;
 
