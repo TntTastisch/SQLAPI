@@ -49,11 +49,10 @@ public class SQLFactory {
 
     /**
      * Creates a database connection with the provided parameters.
-     * @param type           The type of the database to connect to.
      * @param arguments       Additional arguments required for establishing the database connection.
      * @return The ConnectionAuthenticator for the created database connection.
      */
-    public ConnectionAuthenticator createDatabaseConnection(DatabaseType type, String... arguments) {
+    public ConnectionAuthenticator createDatabaseConnection(String... arguments) {
         return connect(8, 1, arguments);
     }
 
