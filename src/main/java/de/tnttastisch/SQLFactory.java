@@ -38,14 +38,13 @@ public class SQLFactory {
 
     /**
      * Creates a database connection with the provided parameters.
-     * @param type           The type of the database to connect to.
      * @param maximumPoolSize The maximum number of connections in the connection pool.
      * @param minIdle         The minimum number of idle connections in the connection pool.
      * @param arguments       Additional arguments required for establishing the database connection.
      * @return The ConnectionAuthenticator for the created database connection.
      */
-    public ConnectionAuthenticator createDatabaseConnection(DatabaseType type, int maximumPoolSize, int minIdle, String... arguments) {
-        return connect(type, maximumPoolSize, minIdle, arguments);
+    public ConnectionAuthenticator createDatabaseConnection(int maximumPoolSize, int minIdle, String... arguments) {
+        return connect(maximumPoolSize, minIdle, arguments);
     }
 
     /**
@@ -55,7 +54,7 @@ public class SQLFactory {
      * @return The ConnectionAuthenticator for the created database connection.
      */
     public ConnectionAuthenticator createDatabaseConnection(DatabaseType type, String... arguments) {
-        return connect(type, 8, 1, arguments);
+        return connect(8, 1, arguments);
     }
 
     /**
@@ -98,9 +97,9 @@ public class SQLFactory {
         });
     }
 
-    private ConnectionAuthenticator connect(DatabaseType type, int maximumPoolSize, int minIdle, String... arguments) {
+    private ConnectionAuthenticator connect(int maximumPoolSize, int minIdle, String... arguments) {
         try {
-            switch (type.getType()) {
+            switch (DatabaseType.getType()) {
                 case MYSQL:
                     this.connectionAuthenticator = new ConnectionAuthenticator(getLogger(), () -> {
                         HikariConfig conf = new HikariConfig();

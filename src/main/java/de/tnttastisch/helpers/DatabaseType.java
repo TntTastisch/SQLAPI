@@ -5,20 +5,20 @@ public enum DatabaseType {
     SQLITE,
     MYSQL;
 
-    public DatabaseType type;
+    private static DatabaseType type;
 
     /**
      * Gets the current database type
      * @return The current DatabaseType.
      */
-    public DatabaseType getType() {
+    public static DatabaseType getType() {
         return type;
     }
 
     /**
      * Sets the database type
      */
-    public void setType(DatabaseType type) {
-        this.type = type;
+    public static void setType(DatabaseType type) {
+        DatabaseType.type = type;
     }
 }
