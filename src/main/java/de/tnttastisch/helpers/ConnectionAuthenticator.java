@@ -11,7 +11,6 @@ public class ConnectionAuthenticator {
 
     private final Logger logger;
     private final HikariPool pool;
-    private final ExecutorService service = Executors.newCachedThreadPool();
     private final DatabaseCommand command;
 
     /**
@@ -23,8 +22,8 @@ public class ConnectionAuthenticator {
      */
     public ConnectionAuthenticator(final Logger logger, final IPoolProvider provider) throws SQLException, InterruptedException {
         this.logger = logger;
-        this.pool = provider.createPool();
-        this.command = new DatabaseCommand(getConnection(), logger, service);
+        this.pool = new HikariPool(provider.createDataSource());
+        this.command = new DatabaseCommand(getConnection(), logger, Executors.newCachedThreadPool());
 
         try (Connection connection = pool.getConnection(15000)) {
             final PreparedStatement statement = connection.prepareStatement("/* ping */ SELECT 1");
@@ -59,7 +58,22 @@ public class ConnectionAuthenticator {
      * @throws InterruptedException If a thread is interrupted while waiting.
      */
     public void shutdown() throws SQLException, InterruptedException {
-        if (getConnection() != null) getPool().shutdown();
+        Connection connection = null;
+        try {
+            connection = getConnection();
+            if (connection != null && !connection.isClosed()) {
+                connection.close();
+            }
+        } catch (SQLException e) {
+            getLogger().error("An error occurred while closing the connection.", e);
+        } finally {
+            if (getPool() != null) {
+                getPool().shutdown();
+            }
+            if (connection != null && !connection.isClosed()) {
+                getLogger().error("The connection was not properly closed.");
+            }
+        }
     }
 
     /**

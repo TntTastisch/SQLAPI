@@ -1,6 +1,7 @@
 package de.tnttastisch;
 
 import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import com.zaxxer.hikari.pool.HikariPool;
 import de.tnttastisch.helpers.ConnectionAuthenticator;
 import de.tnttastisch.helpers.DatabaseCommand;
@@ -30,6 +31,7 @@ public class SQLFactory {
      */
     public SQLFactory(Logger logger) {
         this.logger = logger;
+        this.migrations = new ArrayList<>();
     }
 
     private Logger getLogger() {
@@ -99,55 +101,58 @@ public class SQLFactory {
     private ConnectionAuthenticator connect(int maximumPoolSize, int minIdle, String... arguments) {
         try {
             switch (DatabaseType.getType()) {
-                case MYSQL:
+                case MYSQL: {
                     this.connectionAuthenticator = new ConnectionAuthenticator(getLogger(), () -> {
                         HikariConfig conf = new HikariConfig();
                         conf.setConnectionTimeout(7500);
                         conf.setMaximumPoolSize(maximumPoolSize);
                         conf.setMinimumIdle(minIdle);
-                        conf.setDriverClassName("com.mysql.jdbc.Driver");
-                        if (arguments[5] == null) {
-                            conf.setJdbcUrl(String.format("jdbc:mysql://%s:%s/%s", arguments[0], (Integer.parseInt(arguments[1]) == 0 ? "3306" : arguments[1]), arguments[2]));
-                        } else {
+                        if (arguments.length >= 6 && arguments[5] != null) {
                             conf.setJdbcUrl(String.format("jdbc:mysql://%s:%s/%s?%s", arguments[0], (Integer.parseInt(arguments[1]) == 0 ? "3306" : arguments[1]), arguments[2], arguments[5]));
+                        } else {
+                            conf.setJdbcUrl(String.format("jdbc:mysql://%s:%s/%s", arguments[0], (Integer.parseInt(arguments[1]) == 0 ? "3306" : arguments[1]), arguments[2]));
                         }
                         conf.setUsername(arguments[3]);
                         conf.setPassword(arguments[4]);
-                        return new HikariPool(conf);
+                        return new HikariDataSource(conf);
                     });
                     break;
-                case SQLITE:
+                }
+                case SQLITE: {
                     this.connectionAuthenticator = new ConnectionAuthenticator(getLogger(), () -> {
                         HikariConfig conf = new HikariConfig();
-                        conf.setPoolName("SQLiteConnectionPool");
-                        conf.setDriverClassName("org.sqlite.JDBC");
                         conf.setConnectionTimeout(7500);
                         File confDb;
-                        if(arguments[1] != null) {
+                        if (arguments.length >= 2 && arguments[1] != null) {
                             confDb = new File(arguments[0], arguments[1]);
                         } else {
                             confDb = new File(arguments[0]);
                         }
                         if (!confDb.exists()) {
                             try {
-                                confDb.createNewFile();
+                                if (!confDb.createNewFile()) {
+                                    getLogger().error("An error occurred while trying to create sqlite database file");
+                                    return null;
+                                }
                             } catch (IOException e) {
                                 getLogger().error("An error occurred while trying to create sqlite database file", e);
                                 return null;
                             }
                         }
                         conf.setJdbcUrl("jdbc:sqlite://" + confDb.getAbsolutePath());
-                        return new HikariPool(conf);
+                        return new HikariDataSource(conf);
                     });
                     break;
-                default:
+                }
+                default: {
                     getLogger().error("There was no driver found with this name");
-                    break;
+                }
             }
             return this.connectionAuthenticator;
-        } catch (SQLException | InterruptedException e) {
-            getLogger().error("An error occurred while trying to connect to database: ", e);
+        } catch (Exception e) {
+            getLogger().error("An error occurred while trying to connect to the database: ", e);
             return null;
         }
     }
+
 }

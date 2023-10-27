@@ -23,7 +23,7 @@ public class Migration {
     public Migration(String tableName, String old_table, String new_table) {
         this.tableName = tableName;
         if(hasToMigrate(old_table, new_table)) {
-            table = new_table;
+            this.table = new_table;
             this.outdatedTable = old_table;
             return;
         }
@@ -58,7 +58,7 @@ public class Migration {
         statement.executeUpdate();
 
         System.out.println("[Migration] Creating new Table!");
-        String createNewTableQuery = "CREATE TABLE IF NOT EXISTS " + tableName + " VALUES (" + table + ")";
+        String createNewTableQuery = "CREATE TABLE IF NOT EXISTS " + tableName + " (" + table + ")";
         statement = connection.prepareStatement(createNewTableQuery);
         statement.executeUpdate();
 

@@ -1,5 +1,6 @@
 package de.tnttastisch;
 
+import com.zaxxer.hikari.HikariDataSource;
 import com.zaxxer.hikari.pool.*;
 
 /**
@@ -9,8 +10,8 @@ import com.zaxxer.hikari.pool.*;
 public interface IPoolProvider {
 
     /**
-     * Creates a Hikari connection pool.
-     * @return The HikariPool instance representing the created connection pool.
+     * Creates a Hikari connection source.
+     * @return The HikariDataSource instance representing the created connection pool.
      */
-    HikariPool createPool();
+    HikariDataSource createDataSource();
 }
