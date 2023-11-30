@@ -6,7 +6,7 @@
 
     <groupId>de.tnttastisch</groupId>
     <artifactId>SQLAPI</artifactId>
-    <version>1.1-RELEASE</version>
+    <version>2.2-DEV</version>
 
     <developers>
         <developer>
@@ -53,19 +53,27 @@
             <version>4.0.3</version>
         </dependency>
         <dependency>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+            <version>3.36.0.3</version>
+        </dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>2.0.9</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <version>2.0.9</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>1.4.12</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 
@@ -130,7 +138,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.6.0</version>
+                <version>3.3.0</version>
             </plugin>
         </plugins>
     </reporting>

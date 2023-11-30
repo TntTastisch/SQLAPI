@@ -1,83 +1,24 @@
-package de.tnttastisch;
+package de.tnttastisch.helpers;
 
-import com.zaxxer.hikari.pool.*;
-import org.slf4j.*;
+import org.slf4j.Logger;
 
 import java.sql.*;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 
 /**
- * The SQL class provides an interface to execute SQL queries and updates asynchronously using JDBC.
+ * Since 2.0-RELEASE
  */
-public class SQL {
+public class DatabaseCommand {
 
-    private final Logger logger;
-    private final IPoolProvider provider;
-    private final HikariPool pool;
-    private final ExecutorService service = Executors.newCachedThreadPool();
+    private Connection connection;
+    private Logger logger;
+    private ExecutorService service;
 
-    /**
-     * Constructs an SQL instance with the provided logger and connection pool provider.
-     * @param logger The logger instance to log errors and messages.
-     * @param provider The pool provider for creating the connection pool.
-     * @throws SQLException If a database access error occurs.
-     * @throws InterruptedException If a thread is interrupted while waiting.
-     */
-    public SQL(final Logger logger, final IPoolProvider provider) throws SQLException, InterruptedException {
+    public DatabaseCommand(Connection connection, Logger logger, ExecutorService service) {
+        this.connection = connection;
         this.logger = logger;
-        this.provider = provider;
-        this.pool = provider.createPool();
-
-        try (Connection connection = pool.getConnection(15000)) {
-            final PreparedStatement statement = connection.prepareStatement("/* ping */ SELECT 1");
-            statement.setQueryTimeout(15);
-            statement.executeQuery();
-        } catch (final SQLException exp) {
-            shutdown();
-            getLogger().error("Connection test failed", exp);
-        }
-    }
-
-    /**
-     * Retrieves a connection from the connection pool.
-     * @return The obtained Connection.
-     * @throws SQLException If a database access error occurs.
-     */
-    public Connection getConnection() throws SQLException {
-        return getPool().getConnection();
-    }
-
-    /**
-     * Gets the Hikari connection pool associated with this SQL instance.
-     * @return The HikariPool instance.
-     */
-    public HikariPool getPool() {
-        return pool;
-    }
-
-    /**
-     * Gets the logger instance associated with this SQL instance.
-     * @return The Logger instance.
-     */
-    public Logger getLogger() {
-        return logger;
-    }
-
-    /**
-     * Gets the ExecutorService instance associated with this SQL instance.
-     * @return The ExecutorService instance.
-     */
-    public ExecutorService getService() {
-        return service;
-    }
-
-    /**
-     * Shuts down the connection pool associated with this SQL instance.
-     * @throws SQLException If a database access error occurs.
-     * @throws InterruptedException If a thread is interrupted while waiting.
-     */
-    public void shutdown() throws SQLException, InterruptedException {
-        if (getConnection() != null) getPool().shutdown();
+        this.service = service;
     }
 
     /**
@@ -88,17 +29,36 @@ public class SQL {
      */
     public CompletableFuture<ResultSet> query(String query, Object... arguments) {
         return CompletableFuture.supplyAsync(() -> {
-            try (Connection connection = getConnection()) {
+            try (Connection connection = this.connection) {
                 PreparedStatement statement = connection.prepareStatement(query);
                 setArgs(arguments, statement);
                 ResultSet result = statement.executeQuery();
                 if (!(result.next())) return null;
                 return result;
             } catch (SQLException e) {
-                getLogger().error("A Sql error occurred while catching a query: ", e);
+                this.logger.error("A Sql error occurred while catching a query: ", e);
                 return null;
             }
-        }, getService());
+        }, this.service);
+    }
+
+    /**
+     * Executes a SQL query asynchronously.
+     * @param query The SQL query to execute.
+     * @return A CompletableFuture containing the query result as a ResultSet.
+     */
+    public CompletableFuture<ResultSet> query(String query) {
+        return CompletableFuture.supplyAsync(() -> {
+            try (Connection connection = this.connection) {
+                PreparedStatement statement = connection.prepareStatement(query);
+                ResultSet result = statement.executeQuery();
+                if (!(result.next())) return null;
+                return result;
+            } catch (SQLException e) {
+                this.logger.error("A Sql error occurred while catching a query (single): ", e);
+                return null;
+            }
+        }, this.service);
     }
 
     /**
@@ -109,16 +69,16 @@ public class SQL {
      */
     public CompletableFuture<Void> update(String update, Object... arguments) {
         return CompletableFuture.supplyAsync(() -> {
-            try (Connection connection = getConnection()) {
+            try (Connection connection = this.connection) {
                 PreparedStatement statement = connection.prepareStatement(update);
                 setArgs(arguments, statement);
                 statement.executeUpdate();
                 return null;
             } catch (SQLException e) {
-                getLogger().error("A Sql error occurred while execute an update: ", e);
+                this.logger.error("A Sql error occurred while execute an update: ", e);
                 return null;
             }
-        }, getService());
+        }, this.service);
     }
 
     /**
@@ -128,15 +88,15 @@ public class SQL {
      */
     public CompletableFuture<Void> update(String update) {
         return CompletableFuture.supplyAsync(() -> {
-            try (Connection connection = getConnection()) {
+            try (Connection connection = this.connection) {
                 PreparedStatement statement = connection.prepareStatement(update);
                 statement.executeUpdate();
                 return null;
             } catch (SQLException e) {
-                getLogger().error("A Sql error occurred while execute an update (single): ", e);
+                this.logger.error("A Sql error occurred while execute an update (single): ", e);
                 return null;
             }
-        }, getService());
+        }, this.service);
     }
 
 
@@ -148,16 +108,16 @@ public class SQL {
      */
     public CompletableFuture<Void> largeUpdate(String update, Object... arguments) {
         return CompletableFuture.supplyAsync(() -> {
-            try (Connection connection = getConnection()) {
+            try (Connection connection = this.connection) {
                 PreparedStatement statement = connection.prepareStatement(update);
                 setArgs(arguments, statement);
                 statement.executeLargeUpdate();
                 return null;
             } catch (SQLException e) {
-                getLogger().error("A Sql error occurred while execute a large update: ", e);
+                this.logger.error("A Sql error occurred while execute a large update: ", e);
                 return null;
             }
-        }, getService());
+        }, this.service);
     }
 
     /**
@@ -167,15 +127,15 @@ public class SQL {
      */
     public CompletableFuture<Void> largeUpdate(String update) {
         return CompletableFuture.supplyAsync(() -> {
-            try (Connection connection = getConnection()) {
+            try (Connection connection = this.connection) {
                 PreparedStatement statement = connection.prepareStatement(update);
                 statement.executeLargeUpdate();
                 return null;
             } catch (SQLException e) {
-                getLogger().error("A Sql error occurred while execute a large update: ", e);
+                this.logger.error("A Sql error occurred while execute a large update (single): ", e);
                 return null;
             }
-        }, getService());
+        }, this.service);
     }
 
     private void setArgs(Object[] args, PreparedStatement statement) throws SQLException {
