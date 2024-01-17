@@ -16,7 +16,7 @@ The SQL API for Java offers a user-friendly approach to execute SQL queries and 
     <dependency>
         <groupId>de.tnttastisch</groupId>
         <artifactId>SQLAPI</artifactId>
-        <version>[LATEST-RELEASE-VERSION]</version>
+        <version>1.1-RELEASE</version>
     </dependency>
 </dependencies>
 ```
